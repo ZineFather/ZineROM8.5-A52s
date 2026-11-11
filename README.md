@@ -1,124 +1,50 @@
-<h1 align="center">
-  <img loading="lazy" src="readme-res/banner.png"/>
-</h1>
-<p align="center">
-  <a href="https://github.com/salvogiangri/UN1CA/blob/sixteen/LICENSE"><img loading="lazy" src="https://img.shields.io/github/license/salvogiangri/UN1CA?style=for-the-badge&logo=github"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/commits/sixteen"><img loading="lazy" src="https://img.shields.io/github/last-commit/salvogiangri/UN1CA/sixteen?style=for-the-badge"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/stargazers"><img loading="lazy" src="https://img.shields.io/github/stars/salvogiangri/UN1CA?style=for-the-badge"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/actions/workflows/ci.yml"><img loading="lazy" src="https://img.shields.io/github/actions/workflow/status/salvogiangri/UN1CA/ci.yml?style=for-the-badge"/></a>
-  <a href="https://crowdin.com/project/UN1CA"><img loading="lazy" src="https://img.shields.io/badge/Crowdin-263238?style=for-the-badge&logo=crowdin"/></a>
-</p>
-<p align="center">UN1CA <i>(/ˈu.ni.ka/)</i> is a work-in-progress custom firmware for Samsung Galaxy devices.</p>
+# ZineROM One UI 8.5 for Galaxy A52s 5G
+
+**Target:** Samsung Galaxy A52s 5G (`a52sxq`, `SM-A528B`, Snapdragon 778G / SM7325)<br>
+**System donor:** Galaxy S26 Ultra (`SM-S948B`, EUX), firmware `S948BXXS4AZHL / S948BOXM4AZHL / S948BXXS4AZHL / S948BXXS4AZHL`<br>
+**Android base:** Android 16, platform SDK 36<br>
+**Port lineage:** `seventeen-s26u` → ZineROM One UI 8.5 / Android 16
 
 > [!WARNING]
-> ## k4_un1ca — unofficial fork
-> This repository is an **unofficial, community-maintained fork** of [UN1CA](https://github.com/salvogiangri/UN1CA) by [salvogiangri](https://github.com/salvogiangri).
-> It is **not affiliated with or endorsed by** the UN1CA project. Please don't report problems with k4_un1ca builds to UN1CA.
->
-> **Why this fork exists:** UN1CA itself is actively developed, but its main branch currently targets One UI 8 (`sixteen`).
-> The One UI 9 (`seventeen`) port this fork builds on comes from [devcore94/MonsterROM](https://github.com/devcore94/MonsterROM).
-> k4_un1ca continues that One UI 9 work, focused on bringing it up on the **Galaxy A52s 5G (`a52sxq`, SM7325)**,
-> which only has an Android 14 vendor and a 5.4 kernel.
->
-> **Status (A52s 5G):** One UI 9 boots to the setup wizard and home screen; Wi-Fi, Bluetooth, audio, camera, video,
-> sensors and storage work. Fingerprint and telephony are still being worked on. Expect bugs: this is a bring-up, not a
-> daily-driver release. Builds require the `A528BXXU5FWK4` (BIT 5) firmware as base, an unlocked bootloader and TWRP.
->
-> All credit for the build system and patches goes to the UN1CA and MonsterROM authors; the license (GPL-3.0) is unchanged.
+> This branch contains the Android 16 donor migration and compatibility changes, but has **not yet been built against the pinned donor image or validated on an SM-A528B device**. Treat it as bring-up work, not a flashable or daily-driver release. Do not flash until the Android 16 source image has been extracted, all patch anchors and donor-derived feature values have been audited, and boot/functional testing has passed.
 
-<p align="center">
-  <a href="https://github.com/salvogiangri/UN1CA/discussions">🚀 Discussions</a>
-  •
-  <a href="https://t.me/unicarom">💬 Telegram</a>
-</p>
+## Donor and device compatibility
 
-# What is UN1CA?
-UN1CA is a work-in-progress custom firmware for Samsung Galaxy devices, designed to provide a refined, optimized and more rich One UI experience.
-It is based on the latest and greatest iteration of Samsung's UX and it integrates numerous improvements, optimizations and exclusive features.
+The S26 Ultra EUX Android 16 image is selected as the system donor because it is the matching One UI 8.5 release lineage; the A52s remains the target device and retains its own SM7325/Android 14 vendor and BIT 5 boot-firmware requirements. The S26 Ultra is **not** a same-SoC donor. Qualcomm/SM7325-specific libraries and existing A52s kernel, thermal, battery, performance, and stability adaptations remain sourced from their compatible A52s/A73-family paths rather than being replaced by S26 Ultra hardware blobs.
 
-The UN1CA build system automatically builds the required tools, downloads and extracts firmware components, applies the required patches and generates a flashable zip for the target device.
+The source firmware is deliberately pinned to this normalized AP/CSC/CP/BL tuple (samloader's four-part version format) so a later Android 17 FUS release cannot silently change the build base:
 
-The goal is to deliver a fast, smooth and modern UX while offering additional tools, modifications and system‑level enhancements tailored for power users.
+- AP: `S948BXXS4AZHL`
+- CSC: `S948BOXM4AZHL`
+- CP: `S948BXXS4AZHL`
+- BL: `S948BXXS4AZHL`
 
-Any form of contribution, suggestions, bug report or feature request for the project will be welcome.
+References: [Samsung S26 Ultra update history](https://doc.samsungmobile.com/SM-S948B/ECT/doc.html), [Samsung One UI 8 / Android 16 information](https://www.samsung.com/latin_en/support/mobile-devices/one-ui-8-upgrade-with-android-16/), and [SamMobile's One UI 8.5 firmware report](https://www.sammobile.com/news/leaked-galaxy-s26-ultra-firmware-confirms-one-ui-8-5/).
 
-# Features
-### Core features:
-- Based on the latest stable Galaxy S22 firmware
-- EROFS powered
-- Galaxy S25 wallpapers/sounds included
-- Galaxy AI support
-  - Audio eraser
-  - Browsing assist
-  - Call assist
-  - Drawing assist
-  - Interpreter
-  - Note assist
-  - Now brief
-  - Photo assist
-  - Semantic search
-  - Transcript assist
-  - Writing assist
-- High end animations
-- Native/live blur support
-- AOD clock transition support
-- Adaptive color tone support
-- Adaptive refresh rate support
-- Extra brightness support
-- Picture remaster support
-- Object, shadow and reflection eraser support
-- Image clipper support
-- Multi user support
-- Samsung DeX support*
-- Camera privacy toggle support
-- Debloated from useless system services/additional apps
-- Dual Messenger available for all apps
-- Custom FlipFont fonts support
-- Outdoor mode support
-- Auto PIN confirm with 4 digits
-- [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
-- [KnoxPatch](https://github.com/salvogiangri/KnoxPatch) integrated
-- Extra CSC features enabled (Call recording, Hiya, Network speed in status bar, AltZLife)
+The install target still requires the Galaxy A52s `A528BXXU5FWK4` BIT 5 firmware as its device-side base, an unlocked bootloader, and a compatible recovery. The donor image is a build input; it is not a firmware package to flash onto the A52s.
 
-\* DeX via HDMI not available for devices without USB-C DP support
+## Migration work in this branch
 
-### UN1CA-exclusive features:
-- Integrated OTA updates app
-- Native/live blur toggle
-- One UI Home animations option
-- Vulkan renderer toggle
-- Key attestation spoof ([TrickyStore](https://github.com/5ec1cff/TrickyStore)) options*
-- Play Integrity Fix integrated
-- Ability to hide installed apps ([Hide My Applist](https://github.com/Dr-TSNG/Hide-My-Applist))
-- Ability to hide developer options
-- Allow app downgrade toggle
-- Allow installing apps with old targetSdk toggle
-- Allow secure screenshot toggle
-- Screenshot/screen recording detection toggle
-- Unlimited backup storage on Google Photos
-- Games FPS unlock toggle
+- Changes the configured S26 Ultra source from Android 17 / SDK 37 to the exact Android 16 / SDK 36 donor.
+- Adds version-aware download, extraction, cache invalidation, and build checks so a previously cached Android 17 image cannot be reused as the Android 16 source.
+- Keeps the Android 16 donor's own Tethering APEX and its version-matched loader/BPF programs; the checked-in Android 17 APEX and train artifacts are not applied on SDK 36.
+- Gates Android 17-only native-zygote, property-context, legacy ueventd, seccomp, UDFPS HBM-layer, KeyMint attestation, and KnoxPatch changes by source SDK.
+- Keeps the donor's matching `libhwui` instead of replacing it with an older One UI 8.0 build.
+- Leaves the Android 16 donor's seamless-brightness defaults unchanged; the target-only threshold transition is deferred until its Android16 code path is source-audited.
+- Retains A52s device configuration and the existing SM7325 thermal, battery, performance, and stability work. Those device-specific features still require Android 16 build and device testing.
 
-\* Requires a valid keybox
+The source feature constants inherited from the preceding S26 Ultra port remain marked for re-audit against the pinned Android 16 image. A successful compile alone is not sufficient: the patch set, SELinux policy, camera/fingerprint, telephony, radio, audio, thermal behavior, and sustained-load stability must be reviewed on the target before release.
 
-# Licensing
-This project is licensed under the terms of the [GNU General Public License v3.0](LICENSE). External dependencies might be distributed under a different license, such as:
-- [android-tools](https://github.com/nmeum/android-tools), licensed under the [Apache License 2.0](https://github.com/nmeum/android-tools/blob/master/LICENSE)
-- [apktool](https://github.com/iBotPeaches/Apktool), licensed under the [Apache License 2.0](https://github.com/iBotPeaches/Apktool/blob/master/LICENSE.md)
-- [erofs-utils](https://github.com/sekaiacg/erofs-utils/), dual license ([GPL-2.0](https://github.com/sekaiacg/erofs-utils/blob/dev/LICENSES/GPL-2.0), [Apache-2.0](https://github.com/sekaiacg/erofs-utils/blob/dev/LICENSES/Apache-2.0))
-- [img2sdat](https://github.com/xpirt/img2sdat), licensed under the [MIT License](https://github.com/xpirt/img2sdat/blob/master/LICENSE)
-- [platform_build](https://android.googlesource.com/platform/build/) (ext4_utils, f2fs_utils, signapk), licensed under the [Apache License 2.0](https://source.android.com/docs/setup/about/licenses)
+## Project background and credits
 
-# Contributors
-<a href="https://github.com/salvogiangri/UN1CA/graphs/contributors"><img loading="lazy" src="https://contrib.rocks/image?repo=salvogiangri/UN1CA"/></a>
+ZineROM is an unofficial community port based on the [UN1CA](https://github.com/salvogiangri/UN1CA) build system and patches, with One UI 9 port work inherited from [MonsterROM](https://github.com/devcore94/MonsterROM). It is not affiliated with or endorsed by those projects; please report ZineROM issues to this repository rather than upstream. Preserve the original authors' credits and applicable licenses when redistributing.
 
-# Credits
-A special thanks goes to the following for their invaluable contributions in no particular order:
-- **[ShaDisNX255](https://github.com/ShaDisNX255)** for his help, time and for his [NcX ROM](https://github.com/ShaDisNX255/NcX_Stock) which inspired this project
-- **[DavidArsene](https://github.com/DavidArsene)** for his help and time
-- **[paulowesll](https://github.com/paulowesll)** for his help and support
-- **[Simon1511](https://github.com/Simon1511)** for his support and some of the device-specific patches
-- **[ananjaser1211](https://github.com/ananjaser1211)** for troubleshooting and his time
-- **[Fede2782](https://github.com/Fede2782)** for his contributions and help with Exynos/MTK support
-- **[iDrinkCoffee](https://github.com/iDrinkCoffee-TG)** and **[RisenID](https://github.com/RisenID)** for their support
-- **[LineageOS Team](https://www.lineageos.org/)** for their original [OTA updater implementation](https://github.com/LineageOS/android_packages_apps_Updater)
-- *All the UN1CA project forks, contributors, testers and users ❤️*
+The ROM retains upstream package names and internal `k4`/`unica` property identifiers where required for Settings, updater, and build-system compatibility; visible ROM identity is ZineROM.
+
+## Features
+
+The inherited build system provides Samsung One UI features and ROM-level options including live blur, AOD transitions, adaptive display controls, Galaxy AI components, CSC features, app downgrade controls, Play Integrity hooks, key-attestation options, privacy controls, and GPU driver selection. Availability and behavior on the migrated Android 16 A52s port are **unverified until device testing**.
+
+## Licensing
+
+This project remains under the [GNU General Public License v3.0](LICENSE). External dependencies may use separate licenses; see the upstream project and each dependency's license notices.

@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'sixteen'
+      - 'manus/zinerom85-phase2'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,16 +23,28 @@ jobs:
 
       - name: Run shellcheck
         run: |
-          CODE=0
-          while IFS= read -r f; do
-            shellcheck -e SC1090,SC1091 -s bash "$f" || CODE=1
-          done < <(find platform scripts target unica -name "*.sh" -not -name "*ssi.sh" -not -name "config.sh" -not -name "sff.sh")
-          exit $CODE
+          if [[ "$GITHUB_REPOSITORY" == "ZineFather/ZineROM8.5-A52s" ]]; then
+            shellcheck -e SC1090,SC1091 -s bash \
+              scripts/download_fw.sh \
+              scripts/extract_fw.sh \
+              scripts/internal/gen_config_file.sh \
+              scripts/tests/firmware_version_test.sh \
+              scripts/utils/firmware_utils.sh \
+              scripts/utils/firmware_version.sh \
+              unica/patches/saiv/customize.sh \
+              unica/patches/stock_blobs/customize.sh
+          else
+            CODE=0
+            while IFS= read -r f; do
+              shellcheck -e SC1090,SC1091 -s bash "$f" || CODE=1
+            done < <(find platform scripts target unica -name "*.sh" -not -name "*ssi.sh" -not -name "config.sh" -not -name "sff.sh")
+            exit $CODE
+          fi
 
   generate-matrix:
     name: Generate matrix
     needs: shellcheck
-    # k4_un1ca: the fork's a52sxq build needs locally fetched firmware and prebuilts; only shellcheck runs on GitHub
+    # The ZineROM downstream repository validates only its A52s port; upstream keeps the full target matrix.
     if: github.repository != 'kusti420/k4_un1ca'
     runs-on: ubuntu-24.04
 
@@ -45,8 +58,12 @@ jobs:
       - name: Generate CI matrix
         id: generate-matrix
         run: |
-          matrix="$(find target -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
-            | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')"
+          if [[ "$GITHUB_REPOSITORY" == "ZineFather/ZineROM8.5-A52s" ]]; then
+            matrix='["a52sxq"]'
+          else
+            matrix="$(find target -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
+              | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')"
+          fi
           echo "$matrix"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 

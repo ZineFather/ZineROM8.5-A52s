@@ -89,12 +89,14 @@ REMOVE_FLOATING_FEATURE_TOKEN()
     fi
 }
 
-if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ] && \
-        [ ! -d "$TARGET_FIRMWARE_ROOT/system/system/saiv" ]; then
+if [ -d "$TARGET_FIRMWARE_ROOT/system/system/saiv" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/saiv"
+    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/saiv" 0 0 755 "u:object_r:system_file:s0"
+elif [ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]; then
     ABORT "Target SAIV model directory is missing"
+else
+    LOGW "Target SAIV model directory is missing; retaining source SAIV files for the Android 16 compatibility path"
 fi
-DELETE_FROM_WORK_DIR "system" "system/saiv"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/saiv" 0 0 755 "u:object_r:system_file:s0"
 
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]; then
     # One UI 9 / Android 17 model layout. Only portable source TFLite assets are
@@ -190,12 +192,12 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]; then
         ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "vendor" "$HS_DIR" 0 2000 755 "u:object_r:vendor_configs_file:s0"
     fi
     # Model file names differ between sources (hs_segmenter.info vs 12-23_PhotoEditor_SuggestErases_*.info)
-    for HS_FILE in $(find "$WORK_DIR/vendor/$HS_DIR" -name "*.info"); do
+    while IFS= read -r -d '' HS_FILE; do
         VALIDATE_INFO_MODELS "$HS_FILE"
-    done
-    for HS_FILE in $(find "$WORK_DIR/vendor/$HS_DIR" -name "*.tflite"); do
+    done < <(find "$WORK_DIR/vendor/$HS_DIR" -type f -name "*.info" -print0)
+    while IFS= read -r -d '' HS_FILE; do
         VALIDATE_PORTABLE_TFLITE "$HS_FILE"
-    done
+    done < <(find "$WORK_DIR/vendor/$HS_DIR" -type f -name "*.tflite" -print0)
     unset HS_DIR HS_FILE
 
     # PhotoRemasterService enables its ARTIFACT_DETECTOR estimator only by checking that
@@ -457,10 +459,11 @@ PYEOF
                 "$WORK_DIR/system/$STRIDE_DIR/$MODEL_FILE"
         fi
     done
-    for MODEL_FILE in $(grep -E "\.tflite$" <<< "$STRIDE_NEEDED"); do
+    while IFS= read -r MODEL_FILE; do
+        [ "$MODEL_FILE" ] || continue
         [ -e "$WORK_DIR/system/$STRIDE_DIR/$MODEL_FILE" ] && \
             VALIDATE_PORTABLE_TFLITE "$WORK_DIR/system/$STRIDE_DIR/$MODEL_FILE"
-    done
+    done < <(grep -E "\.tflite$" <<< "$STRIDE_NEEDED")
     unset STRIDE_LIB STRIDE_DIR STRIDE_NEEDED
 
     # Android 17 SmartScan still supports the old _cnn.info + Caffe CPU fallback.

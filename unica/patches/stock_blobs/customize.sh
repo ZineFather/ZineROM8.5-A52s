@@ -24,6 +24,10 @@ MATCH_TARGET_FEATURES()
 
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
 
+if [ ! -d "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system" ]; then
+    ABORT "Target system partition was not extracted; stock_blobs needs $TARGET_FIRMWARE_PATH/system/system"
+fi
+
 MATCH_TARGET_FEATURES
 
 # TODO add APE/DSD extractor libs if required

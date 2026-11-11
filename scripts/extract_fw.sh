@@ -352,6 +352,10 @@ for i in "${FIRMWARES[@]}"; do
     PARSE_FIRMWARE_STRING "$i" || exit 1
 
     if [ "$FIRMWARE_VERSION" ]; then
+        if ! VALIDATE_FIRMWARE_VERSION "$MODEL" "$FIRMWARE_VERSION"; then
+            LOGE "Pinned firmware version must be an AP/CSC/CP/BL tuple for $MODEL: $FIRMWARE_VERSION"
+            exit 1
+        fi
         SELECTED_FIRMWARE="$FIRMWARE_VERSION"
         LATEST_FIRMWARE="pinned: $SELECTED_FIRMWARE"
     else

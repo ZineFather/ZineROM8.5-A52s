@@ -2,19 +2,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # ZineROM One UI 8.5 donor: Galaxy S26 Ultra SM-S948B / EUX.
-# S948BXXS4AZHL / S948BOXM4AZHL / S948BXXS4AZHL / S948BXXS4AZHL is an Android 16 build (Aug. 2026); Samsung's update
+# S948BXXS4AZHL / S948BOXM4AZHL / CP36080667 / S948BXXS4AZHL is an Android 16 build (Aug. 2026); Samsung's update
 # record confirms its Android version. Pin the complete AP/CSC/CP/BL tuple so a later Android 17 FUS release cannot replace it.
 # Source-specific feature values below retain the S26 Ultra hardware profile from the preceding port; they must be
 # re-audited against the pinned Android 16 image before publishing a flashable build.
 SOURCE_FIRMWARE="SM-S948B/EUX/35003251"
-SOURCE_FIRMWARE_VERSION="S948BXXS4AZHL/S948BOXM4AZHL/S948BXXS4AZHL/S948BXXS4AZHL"
+SOURCE_FIRMWARE_VERSION="S948BXXS4AZHL/S948BOXM4AZHL/CP36080667/S948BXXS4AZHL"
 SOURCE_EXTRA_FIRMWARES=()
 # system/build.prop ro.build.version.sdk=36 (Android 16)
 SOURCE_PLATFORM_SDK_VERSION=36
 # S26 Ultra shipped on Android 16; source shipping API remains 36.
 SOURCE_PRODUCT_SHIPPING_API_LEVEL=36
-# Android 16 board API.
-SOURCE_BOARD_API_LEVEL=36
+# The Android 16 vendor API level is date-based (YYYYMM), distinct from SDK 36.
+SOURCE_BOARD_API_LEVEL=202504
 
 # SEC Product Feature
 # framework.jar SemMultiMicManager.isSupported()/isSupported(I) "08030"

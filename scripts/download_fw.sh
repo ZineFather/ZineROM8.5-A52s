@@ -125,13 +125,7 @@ for i in "${FIRMWARES[@]}"; do
     PARSE_FIRMWARE_STRING "$i" || exit 1
 
     if [ "$FIRMWARE_VERSION" ]; then
-        IFS='/' read -r -a VERSION_PARTS <<< "$FIRMWARE_VERSION"
-        MODEL_CODE="${MODEL#SM-}"
-        if [ "${#VERSION_PARTS[@]}" -ne 4 ] || \
-                [[ "${VERSION_PARTS[0]}" != "$MODEL_CODE"* ]] || \
-                [[ "${VERSION_PARTS[1]}" != "$MODEL_CODE"* ]] || \
-                [[ "${VERSION_PARTS[2]}" != "$MODEL_CODE"* ]] || \
-                [[ "${VERSION_PARTS[3]}" != "$MODEL_CODE"* ]]; then
+        if ! VALIDATE_FIRMWARE_VERSION "$MODEL" "$FIRMWARE_VERSION"; then
             LOGE "Pinned firmware version must be an AP/CSC/CP/BL tuple for $MODEL: $FIRMWARE_VERSION"
             exit 1
         fi

@@ -1,3 +1,4 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ]; then
 # Android 17 runs services that are both android:nativeService and isolatedProcess in the new native zygote
 # (zygote_next). On this port zygote_next starts but never sets zygote.zygote_next.server_ready, so the
 # ActivityManager procStart thread waits on it until the watchdog kills system_server ("Blocked in handler on
@@ -117,3 +118,6 @@ assert "iput-boolean" in s and "mIsNativeIsolated:Z" in s, "mIsNativeIsolated"
 open(f, "w").write(s)
 PYEOF
 LOG "- Native isolated services resolved as not found (Chrome redirected to its Java sandbox), zygote_next never used"
+else
+    LOG "- Skipping the Android 17 native-zygote workaround on the Android 16 donor"
+fi

@@ -17,6 +17,7 @@ APPLY_MODULE()
     local MODPATH="$1"
     local MODNAME
     local MODAUTH
+    local MOD_MIN_SOURCE_SDK
 
     if [ ! -d "$MODPATH" ]; then
         LOGE "Folder not found: ${MODPATH//$SRC_DIR\//}"
@@ -38,6 +39,20 @@ APPLY_MODULE()
     fi
 
     LOG_STEP_IN "- Processing \"$MODNAME\" by @$MODAUTH"
+
+    MOD_MIN_SOURCE_SDK="$(sed -n 's/^min_source_sdk=//p' "$MODPATH/module.prop")"
+    if [ "$MOD_MIN_SOURCE_SDK" ]; then
+        if [[ ! "$MOD_MIN_SOURCE_SDK" =~ ^[0-9]+$ ]] || [[ ! "$SOURCE_PLATFORM_SDK_VERSION" =~ ^[0-9]+$ ]]; then
+            LOGE "Invalid min_source_sdk metadata in ${MODPATH//$SRC_DIR\//}/module.prop"
+            LOG_STEP_OUT
+            return 1
+        fi
+        if [ "$SOURCE_PLATFORM_SDK_VERSION" -lt "$MOD_MIN_SOURCE_SDK" ]; then
+            LOG "- Skipping this module; it requires source SDK $MOD_MIN_SOURCE_SDK or newer"
+            LOG_STEP_OUT
+            return 0
+        fi
+    fi
 
     if ! grep -q "^SKIPUNZIP=1$" "$MODPATH/customize.sh" 2> /dev/null; then
         if [ -d "$MODPATH/odm" ]; then

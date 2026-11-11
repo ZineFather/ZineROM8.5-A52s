@@ -36,8 +36,9 @@ else
     LOG_STEP_OUT
 fi
 
-# r9q libhwui is One UI 8 (Android 16); it is not ABI compatible with an Android 17 framework
-if [ "$SOURCE_PLATFORM_SDK_VERSION" -lt "37" ]; then
+# Keep the established Android16 r9q libhwui fallback for other SM7325 targets; A52s uses the pinned One UI 8.5
+# donor's matching library instead of importing an older One UI 8.0 build.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -lt "37" ] && [ "$TARGET_CODENAME" != "a52sxq" ]; then
     ADD_TO_WORK_DIR "r9qxxx" "system" "system/lib/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
     ADD_TO_WORK_DIR "r9qxxx" "system" "system/lib64/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
 fi

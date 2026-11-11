@@ -1,3 +1,4 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ]; then
 UEVENTD_RC="$WORK_DIR/system/system/etc/ueventd.rc"
 
 if [ -f "$WORK_DIR/vendor/ueventd.rc" ] && [ ! -f "$WORK_DIR/vendor/etc/ueventd.rc" ] && \
@@ -8,3 +9,6 @@ if [ -f "$WORK_DIR/vendor/ueventd.rc" ] && [ ! -f "$WORK_DIR/vendor/etc/ueventd.
 fi
 
 unset UEVENTD_RC
+else
+    LOG "- Skipping the Android 17 legacy ueventd import on the Android 16 donor"
+fi

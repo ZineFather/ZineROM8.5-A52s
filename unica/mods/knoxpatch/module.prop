@@ -2,3 +2,4 @@ id=knoxpatch
 name=KnoxPatch
 author=salvogiangri
 description=Intent-based KnoxPatch port for One UI 9 / Android 17.
+min_source_sdk=37

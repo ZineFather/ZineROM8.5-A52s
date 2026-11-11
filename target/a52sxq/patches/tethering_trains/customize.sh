@@ -1,3 +1,6 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -lt "37" ]; then
+    LOG "- Android 16 uses the donor's stock Tethering loader/BPF set; skipping the Android 17 train checker"
+else
 # See module.prop. Runs after "tethering" (modules apply in C-locale name order), so a52_netd.o is already in place.
 TT_NETD="$WORK_DIR/system/system/etc/bpf/a52_netd.o"
 if [ ! -f "$TT_NETD" ]; then
@@ -20,3 +23,4 @@ else
     unset TT_KNOWN TT_OUT TT_RC
 fi
 unset TT_NETD
+fi

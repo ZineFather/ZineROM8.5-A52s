@@ -1,3 +1,4 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ]; then
 # A17 init loads /vendor/build.prop and /vendor/default.prop with an SELinux check in the vendor_init context
 # ("SELinux permission check failed (source_context=u:r:vendor_init:s0 ...)" in the kernel log), and the A17 platform
 # property_contexts/policy no longer let vendor_init set the labels these A14 vendor props get:
@@ -50,6 +51,9 @@ if [ "$RC_LINES" ]; then
 fi
 unset RC RC_LINES p v f
 LOG_STEP_OUT
+else
+    LOG "- Skipping Android 17 vendor-property re-declaration on the Android 16 donor"
+fi
 
 # S26 Ultra SurfaceFlinger computes the density from ro.sf.init.lcd_density (native-resolution density, used for its
 # QHD+/FHD+ switching); unset it fell back to 213 dpi -> tablet UI (smallest width 811dp). The A52s panel is natively

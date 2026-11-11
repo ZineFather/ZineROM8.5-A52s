@@ -1290,6 +1290,10 @@ if [[ "$SOURCE_LCD_CONFIG_SEAMLESS_BRT" != "$TARGET_LCD_CONFIG_SEAMLESS_BRT" ]] 
             'invoke-static {v1, v2, v3, v0}, Lcom/samsung/android/hardware/display/RefreshRateConfig;->createRefreshRateConfig(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/samsung/android/hardware/display/RefreshRateConfig$BrightnessThreshold;)Lcom/samsung/android/hardware/display/RefreshRateConfig;' \
             "$API37_NS_ARG"
         unset API37_THRESHOLD_REGS API37_NS_ARG
+    elif [[ "$SOURCE_PLATFORM_SDK_VERSION" == "36" ]] && \
+            [[ "$SOURCE_LCD_CONFIG_SEAMLESS_BRT" == "none" ]] && [[ "$SOURCE_LCD_CONFIG_SEAMLESS_LUX" == "none" ]] && \
+            [[ "$TARGET_LCD_CONFIG_SEAMLESS_BRT" != "none" ]] && [[ "$TARGET_LCD_CONFIG_SEAMLESS_LUX" != "none" ]]; then
+        LOGW "Keeping the Android 16 donor's stock seamless-brightness config; the A52s-only threshold transition is not ported"
     elif [[ "$SOURCE_LCD_CONFIG_SEAMLESS_BRT" != "none" ]] && [[ "$SOURCE_LCD_CONFIG_SEAMLESS_LUX" != "none" ]] && \
             [[ "$TARGET_LCD_CONFIG_SEAMLESS_BRT" == "none" ]] && [[ "$TARGET_LCD_CONFIG_SEAMLESS_LUX" == "none" ]]; then
         APPLY_PATCH "system" "system/framework/framework.jar" \

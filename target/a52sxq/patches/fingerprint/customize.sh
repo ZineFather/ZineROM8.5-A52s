@@ -54,7 +54,7 @@ done
 # carries usage bit 34, and writes the HBM level (331, what SemUdfpsOpticalHelper computes for this panel)
 # to mask_brightness. BiometricSetting is system_app, which may write sysfs_lcd_writable.
 BSS="system/priv-app/BiometricSetting/BiometricSetting.apk"
-if [ -f "$WORK_DIR/system/$BSS" ]; then
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ] && [ -f "$WORK_DIR/system/$BSS" ]; then
     DECODE_APK "system" "$BSS" || ABORT "Failed to decode $BSS"
     LOG "- Adding a fingerprint indisplay layer to UdfpsMaskWindow"
     python3 - "$APKTOOL_DIR/system/${BSS//system\//}" << 'PYEOF' || ABORT "Failed to patch UdfpsMaskWindow"
@@ -287,7 +287,7 @@ fi
 # (SurfaceFlinger: "created and destroyed in the same transaction") and nothing retries: no HBM, the queued touch
 # is never delivered and only the second press (window now has a surface) unlocks. Attach the layer (again) from
 # LightSourceView.surfaceCreated, the SurfaceView inside the mask window, which fires once the surface is valid.
-if [ -f "$WORK_DIR/system/$BSS" ]; then
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ] && [ -f "$WORK_DIR/system/$BSS" ]; then
     LOG "- Attaching the fingerprint indisplay layer on mask surface creation"
     python3 - "$APKTOOL_DIR/system/${BSS//system\//}" << 'PYEOF' || ABORT "Failed to patch LightSourceView"
 import glob, sys

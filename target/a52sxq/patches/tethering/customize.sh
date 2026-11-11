@@ -1,3 +1,9 @@
+if [[ "$SOURCE_PLATFORM_SDK_VERSION" == "36" ]]; then
+    LOG "- Keeping the Android 16 donor's stock Tethering APEX and version-matched loader/BPF programs"
+    ${TARGET_TETHERING_RESIGN_APEX:-false} && ABORT "tethering: the checked-in re-signed APEX is Android17-only; Android16 builds must use the donor APEX"
+    strings -n 15 "$WORK_DIR/kernel/boot.img" | grep -qx "bpf_ringbuf_map" || \
+        ABORT "tethering: Android16 donor APEX requires the A52s ringbuf-capable kernel"
+elif [[ "$SOURCE_PLATFORM_SDK_VERSION" == "37" ]]; then
 # All shipped binaries are generated from the SOURCE firmware's com.google.android.tethering APEX by regen.py: since
 # 2026-10-09 the Galaxy S25 / S26 Ultra Tethering 371021120 (Fold8 370547200 before). The source system also ships a
 # precompiled odex for that APEX's service-connectivity.jar, so the APEX must match the source exactly (guard below).
@@ -164,3 +170,6 @@ else
         ABORT "tethering: system/apex/com.google.android.tethering_compressed.apex in the work dir is missing or not the source's"
 fi
 unset TETH_RESIGN
+else
+    ABORT "tethering: unsupported donor SDK $SOURCE_PLATFORM_SDK_VERSION; only Android16 stock or audited Android17 artifacts are supported"
+fi

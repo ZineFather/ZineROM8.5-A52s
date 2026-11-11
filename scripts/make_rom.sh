@@ -108,16 +108,36 @@ if $BUILD_ROM; then
     # unica/mods/preload removes the dir, so a build that stopped earlier would leave a stale or delisted APK behind
     rm -rf "${WORK_DIR:?}/.extra_preload"
 
-    if [ ! -f "$FW_DIR/$SOURCE_FIRMWARE_PATH/.extracted" ] || [ ! -f "$FW_DIR/$TARGET_FIRMWARE_PATH/.extracted" ]; then
-        if [ ! -f "$ODIN_DIR/$SOURCE_FIRMWARE_PATH/.downloaded" ] || [ ! -f "$ODIN_DIR/$TARGET_FIRMWARE_PATH/.downloaded" ]; then
-            LOG_STEP_IN true "Downloading required firmwares"
-            "$SRC_DIR/scripts/download_fw.sh" || exit 1
-            LOG_STEP_OUT
+    SOURCE_FW_READY=false
+    TARGET_FW_READY=false
+    if [ -f "$FW_DIR/$SOURCE_FIRMWARE_PATH/.extracted" ]; then
+        SOURCE_FW_EXTRACTED="$(cat "$FW_DIR/$SOURCE_FIRMWARE_PATH/.extracted")"
+        if [[ "${SOURCE_FIRMWARE_VERSION:-none}" == "none" ]] || \
+                [[ "$SOURCE_FW_EXTRACTED" == "$SOURCE_FIRMWARE_VERSION" ]]; then
+            SOURCE_FW_READY=true
+        else
+            LOGW "Cached source firmware $SOURCE_FW_EXTRACTED does not match pinned donor $SOURCE_FIRMWARE_VERSION"
         fi
+    fi
+    if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/.extracted" ]; then
+        TARGET_FW_EXTRACTED="$(cat "$FW_DIR/$TARGET_FIRMWARE_PATH/.extracted")"
+        if [[ "${TARGET_FIRMWARE_VERSION:-none}" == "none" ]] || \
+                [[ "$TARGET_FW_EXTRACTED" == "$TARGET_FIRMWARE_VERSION" ]]; then
+            TARGET_FW_READY=true
+        else
+            LOGW "Cached target firmware $TARGET_FW_EXTRACTED does not match pinned target $TARGET_FIRMWARE_VERSION"
+        fi
+    fi
+    if ! $SOURCE_FW_READY || ! $TARGET_FW_READY; then
+        # download_fw handles exact pinned markers and replaces a stale Android17 cache when needed.
+        LOG_STEP_IN true "Downloading required firmwares"
+        "$SRC_DIR/scripts/download_fw.sh" || exit 1
+        LOG_STEP_OUT
         LOG_STEP_IN true "Extracting required firmwares"
         "$SRC_DIR/scripts/extract_fw.sh" || exit 1
         LOG_STEP_OUT
     fi
+    unset SOURCE_FW_READY TARGET_FW_READY SOURCE_FW_EXTRACTED TARGET_FW_EXTRACTED
 
     LOG_STEP_IN true "Creating work dir"
     "$SRC_DIR/scripts/internal/create_work_dir.sh" || exit 1
@@ -198,7 +218,11 @@ if $BUILD_ROM; then
 fi
 
 if $BUILD_TARGET_FILES || $BUILD_FLASHABLE_ZIP; then
-    ZIP_FILE_NAME="${TARGET_CODENAME}_"
+    if [[ "$TARGET_CODENAME" == "a52sxq" ]]; then
+        ZIP_FILE_NAME="ZineROM_A52s_OneUI"
+    else
+        ZIP_FILE_NAME="${TARGET_CODENAME}_"
+    fi
     if [ "$(GET_PROP "system" "ro.unica.version")" ]; then
         ZIP_FILE_NAME+="$(GET_PROP "system" "ro.unica.version")"
     else

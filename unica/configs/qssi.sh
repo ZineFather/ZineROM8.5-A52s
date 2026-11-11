@@ -1,40 +1,19 @@
 # Copyright (c) 2025 Salvo Giangreco
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# UN1CA configuration file for Snapdragon devices (qssi)
-
-# Galaxy S26 Ultra SM-S948B EUX S948BXXS4BZIG (CP2A.260605.016, SDK 37; switched from the S25 SM-S931B on 2026-10-09:
-# same Android build). The IMEI field is only a TAC (samloader completes it); the firmware is pre-downloaded/extracted
-# in out/fw/SM-S948B_EUX.
-#
-# Every SOURCE_* value below was re-derived on 2026-10-09 from out/fw/SM-S948B_EUX: the literal the consuming
-# SMALI_PATCH/REQUIRE_* searches for was read from the S26 Ultra smali (decoded into ~/.cache/s26u_smali: framework.jar,
-# services.jar, ssrm.jar, semwifi-service.jar, telephony-common.jar, secinputdev-service.jar, esecomm.jar,
-# SecSettings.apk, SettingsProvider.apk, SystemUI.apk, SecureElement.apk, SamsungDeviceHealthManagerService.apk),
-# every patch-referenced smali was diffed against the S25 decode (~/.cache/s25smali) and cross-checked against
-# system/etc/floating_feature.xml and the build.props; all unica/patches were then dry-run against the S26U tree
-# with these values (no ABORT / LOG_MISSING_PATCHES / failed SMALI_PATCH).
-# Values that are not a smali literal and could not be verified one-to-one (kept, see why):
-# - SOURCE_LCD_CONFIG_COLOR_WEAKNESS_SOLUTION: not compiled in as a literal; only used as "!= 0" in product_feature.
-#   The S26U A11yRune (DMC_COLORWEAKNESS) is byte-identical to the S25 one and SemMdnieManagerService only differs
-#   in its .source line -> 3 kept (upstream S25 Ultra config uses 3 as well).
-# - SOURCE_BLUETOOTH_SUPPORT_*: not consumed by any script (unica/patches/bluetooth has no profile patches any more).
-#   The S26U Bluetooth.apk (com.android.bt.apex) only differs from the S25 one by the removed AdapterService$6
-#   "[BT SAR]HEAD" receiver (HEAD_SAR_BACKOFF compiled out -> false); AdapterService mAccelerSensor,
-#   A2dpService$AudioManagerAudioDeviceCallback and the a2dpsink classes are unchanged -> kept.
-# - SOURCE_WLAN_SUPPORT_LOWLATENCY / TWT_CONTROL: on API 37 these come from the vendor feature string; the S26U
-#   WifiDriverFeatureProvider only differs from the S25 one in its .source line -> kept true.
-# - SOURCE_FRAMEWORK_SUPPORT_FOLDABLE_TYPE_FOLD / HALF_FOLDED_MODE, SOURCE_LCD_CONFIG_SUB_HFR_*, SOURCE_CAMERA_APP_FLAVOR:
-#   not consumed by any script; set from the S26U floating_feature.xml / SamsungCamera.apk (all entries except
-#   SEC-INF/buildinfo.xml and the signature are CRC-identical to the S25 hal3-release build).
+# ZineROM One UI 8.5 donor: Galaxy S26 Ultra SM-S948B / EUX.
+# S948BXXS4AZHL / S948BOXM4AZHL / S948BXXS4AZHL / S948BXXS4AZHL is an Android 16 build (Aug. 2026); Samsung's update
+# record confirms its Android version. Pin the complete AP/CSC/CP/BL tuple so a later Android 17 FUS release cannot replace it.
+# Source-specific feature values below retain the S26 Ultra hardware profile from the preceding port; they must be
+# re-audited against the pinned Android 16 image before publishing a flashable build.
 SOURCE_FIRMWARE="SM-S948B/EUX/35003251"
+SOURCE_FIRMWARE_VERSION="S948BXXS4AZHL/S948BOXM4AZHL/S948BXXS4AZHL/S948BXXS4AZHL"
 SOURCE_EXTRA_FIRMWARES=()
-# system/build.prop ro.build.version.sdk=37
-SOURCE_PLATFORM_SDK_VERSION=37
-# vendor/build.prop ro.product.first_api_level=36; "36" in EsecommAdapter, HdmSakManager, TAProxy, SystemServer
-# ("MAINLINE_API_LEVEL: 36"), PowerManagerUtil, EngmodeService$EngmodeTimeThread
+# system/build.prop ro.build.version.sdk=36 (Android 16)
+SOURCE_PLATFORM_SDK_VERSION=36
+# S26 Ultra shipped on Android 16; source shipping API remains 36.
 SOURCE_PRODUCT_SHIPPING_API_LEVEL=36
-# vendor/build.prop ro.board.api_level=202504 / ro.board.first_api_level=202504 (Android 16 vendor API)
+# Android 16 board API.
 SOURCE_BOARD_API_LEVEL=36
 
 # SEC Product Feature

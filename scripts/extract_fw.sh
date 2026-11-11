@@ -8,9 +8,11 @@ source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
 FORCE=false
 
 FIRMWARES=()
+FIRMWARE_VERSIONS=()
 MODEL=""
 CSC=""
 LATEST_FIRMWARE=""
+SELECTED_FIRMWARE=""
 DOWNLOADED_FIRMWARE=""
 BL_TAR=""
 AP_TAR=""
@@ -186,23 +188,28 @@ PREPARE_SCRIPT()
     if ! $IGNORE_SOURCE; then
         _CHECK_NON_EMPTY_PARAM "SOURCE_FIRMWARE" "$SOURCE_FIRMWARE" || exit 1
         FIRMWARES+=("$SOURCE_FIRMWARE")
+        FIRMWARE_VERSIONS+=("${SOURCE_FIRMWARE_VERSION:-}")
         IFS=':' read -r -a SOURCE_EXTRA_FIRMWARES <<< "$SOURCE_EXTRA_FIRMWARES"
         if [ "${#SOURCE_EXTRA_FIRMWARES[@]}" -ge 1 ]; then
             FIRMWARES+=("${SOURCE_EXTRA_FIRMWARES[@]}")
+            for _ in "${SOURCE_EXTRA_FIRMWARES[@]}"; do FIRMWARE_VERSIONS+=(""); done
         fi
     fi
 
     if ! $IGNORE_TARGET; then
         _CHECK_NON_EMPTY_PARAM "TARGET_FIRMWARE" "$TARGET_FIRMWARE" || exit 1
         FIRMWARES+=("$TARGET_FIRMWARE")
+        FIRMWARE_VERSIONS+=("${TARGET_FIRMWARE_VERSION:-}")
         IFS=':' read -r -a TARGET_EXTRA_FIRMWARES <<< "$TARGET_EXTRA_FIRMWARES"
         if [ "${#TARGET_EXTRA_FIRMWARES[@]}" -ge 1 ]; then
             FIRMWARES+=("${TARGET_EXTRA_FIRMWARES[@]}")
+            for _ in "${TARGET_EXTRA_FIRMWARES[@]}"; do FIRMWARE_VERSIONS+=(""); done
         fi
     fi
 
     if [ "${#EXTRA_FIRMWARES[@]}" -ge 1 ]; then
         FIRMWARES+=("${EXTRA_FIRMWARES[@]}")
+        for _ in "${EXTRA_FIRMWARES[@]}"; do FIRMWARE_VERSIONS+=(""); done
     fi
 }
 
@@ -337,38 +344,53 @@ STORE_OS_PARTITION_METADATA()
 
 PREPARE_SCRIPT "$@"
 
+FIRMWARE_INDEX=0
 for i in "${FIRMWARES[@]}"; do
+    FIRMWARE_VERSION="${FIRMWARE_VERSIONS[$FIRMWARE_INDEX]:-}"
+    FIRMWARE_INDEX=$((FIRMWARE_INDEX + 1))
+    [[ "$FIRMWARE_VERSION" == "none" ]] && FIRMWARE_VERSION=""
     PARSE_FIRMWARE_STRING "$i" || exit 1
 
-    LATEST_FIRMWARE="$(GET_LATEST_FIRMWARE "$MODEL" "$CSC")"
-    if [ ! "$LATEST_FIRMWARE" ]; then
-        LOGE "Latest available firmware could not be fetched"
-        exit 1
+    if [ "$FIRMWARE_VERSION" ]; then
+        SELECTED_FIRMWARE="$FIRMWARE_VERSION"
+        LATEST_FIRMWARE="pinned: $SELECTED_FIRMWARE"
+    else
+        LATEST_FIRMWARE="$(GET_LATEST_FIRMWARE "$MODEL" "$CSC")"
+        if [ ! "$LATEST_FIRMWARE" ]; then
+            LOGE "Latest available firmware could not be fetched"
+            exit 1
+        fi
+        SELECTED_FIRMWARE="$LATEST_FIRMWARE"
     fi
 
     LOG_STEP_IN "- Processing $MODEL firmware with $CSC CSC"
     LOG "- Downloaded firmware: $(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded" 2> /dev/null)"
     LOG "- Extracted firmware: $(cat "$FW_DIR/${MODEL}_${CSC}/.extracted" 2> /dev/null)"
-    LOG "- Latest available firmware: $LATEST_FIRMWARE"
+    LOG "- Requested firmware: $SELECTED_FIRMWARE"
 
     LOG_STEP_IN
 
     if ! $FORCE; then
         # Skip if firmware has been extracted
         if [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ]; then
-            if ! COMPARE_SEC_BUILD_VERSION "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" "$LATEST_FIRMWARE"; then
-                if [ -f "$ODIN_DIR/${MODEL}_${CSC}/.downloaded" ] && \
-                        ! COMPARE_SEC_BUILD_VERSION "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" "$(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded")"; then
-                    LOG "\033[0;33m! A newer firmware has been downloaded, use --force flag if you want to overwrite it\033[0m"
+            EXTRACTED_FIRMWARE="$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")"
+            if [ "$FIRMWARE_VERSION" ]; then
+                if [[ "$EXTRACTED_FIRMWARE" == "$SELECTED_FIRMWARE" ]]; then
+                    LOG "\033[0;33m! The pinned firmware has already been extracted, skipping\033[0m"
+                    LOG_STEP_OUT; LOG_STEP_OUT
+                    continue
                 else
-                    LOG "\033[0;33m! A newer firmware is available for download\033[0m"
+                    LOG "- Extracted firmware differs from the pinned donor; rebuilding the extraction"
                 fi
+            elif COMPARE_SEC_BUILD_VERSION "$EXTRACTED_FIRMWARE" "$LATEST_FIRMWARE"; then
+                LOG "\033[0;33m! This firmware has already been extracted, skipping\033[0m"
+                LOG_STEP_OUT; LOG_STEP_OUT
+                continue
             else
-                LOG "\033[0;33m! This firmware has already been extracted\033[0m"
+                LOG "\033[0;33m! A newer firmware is available; use --force to replace the cached extraction\033[0m"
+                LOG_STEP_OUT; LOG_STEP_OUT
+                continue
             fi
-
-            LOG_STEP_OUT; LOG_STEP_OUT
-            continue
         fi
     fi
 
@@ -378,10 +400,14 @@ for i in "${FIRMWARES[@]}"; do
         exit 1
     fi
 
+    DOWNLOADED_FIRMWARE="$(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded")"
+    if [ "$FIRMWARE_VERSION" ] && [[ "$DOWNLOADED_FIRMWARE" != "$SELECTED_FIRMWARE" ]]; then
+        LOGE "Downloaded firmware marker does not match pinned version $SELECTED_FIRMWARE (found $DOWNLOADED_FIRMWARE); run download_fw first"
+        exit 1
+    fi
+
     [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ] && rm -rf "$FW_DIR/${MODEL}_${CSC}"
     mkdir -p "$FW_DIR/${MODEL}_${CSC}"
-
-    DOWNLOADED_FIRMWARE="$(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded")"
 
     BL_TAR="$(find "$ODIN_DIR/${MODEL}_${CSC}" -name "BL_$(cut -d "/" -f 1 -s <<< "$DOWNLOADED_FIRMWARE")*.md5" | sort -r | head -n 1)"
     AP_TAR="$(find "$ODIN_DIR/${MODEL}_${CSC}" -name "AP_$(cut -d "/" -f 1 -s <<< "$DOWNLOADED_FIRMWARE")*.md5" | sort -r | head -n 1)"

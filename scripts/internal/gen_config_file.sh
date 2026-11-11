@@ -63,6 +63,23 @@ else
     source "$SRC_DIR/unica/configs/$TARGET_OS_SINGLE_SYSTEM_IMAGE.sh" || exit 1
 fi
 
+# This A52s port is tied to the S26 Ultra One UI 8.5 / Android 16 source image.
+# Do not let a future FUS update or a stale SDK override silently restore the Android 17 donor.
+if [[ "$TARGET_CODENAME" == "a52sxq" ]]; then
+    [[ "$SOURCE_FIRMWARE" == "SM-S948B/EUX/"* ]] || {
+        LOGE "a52sxq requires the pinned S26 Ultra SM-S948B/EUX donor"
+        exit 1
+    }
+    [[ "$SOURCE_FIRMWARE_VERSION" == "S948BXXS4AZHL/S948BOXM4AZHL/S948BXXS4AZHL/S948BXXS4AZHL" ]] || {
+        LOGE "a52sxq requires the S26 Ultra Android 16 One UI 8.5 AP/CSC/CP/BL tuple S948BXXS4AZHL/S948BOXM4AZHL/S948BXXS4AZHL/S948BXXS4AZHL"
+        exit 1
+    }
+    [[ "$SOURCE_PLATFORM_SDK_VERSION" == "36" ]] || {
+        LOGE "a52sxq donor SDK must be 36 (Android 16), not $SOURCE_PLATFORM_SDK_VERSION"
+        exit 1
+    }
+fi
+
 if [ -f "$OUT_DIR/config.sh" ]; then
     LOGW "config.sh already exists. Regenerating"
     rm -f "$OUT_DIR/config.sh"
@@ -471,6 +488,7 @@ fi
     GET_BUILD_VAR "ROM_VERSION"
     GET_BUILD_VAR "ROM_BUILD_TIMESTAMP" "$(date +%s)"
     GET_BUILD_VAR "SOURCE_FIRMWARE"
+    GET_BUILD_VAR "SOURCE_FIRMWARE_VERSION" "none"
     if [ "${#SOURCE_EXTRA_FIRMWARES[@]}" -ge 1 ]; then
         echo "SOURCE_EXTRA_FIRMWARES=\"$(IFS=":"; printf '%s' "${SOURCE_EXTRA_FIRMWARES[*]}")\""
     else

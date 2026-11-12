@@ -1,0 +1,58 @@
+name: A52s Static Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - seventeen-s26u
+  push:
+    branches:
+      - work/seventeen-s26u-fixes
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a52sxq-static-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate A52s source configuration
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate Bash syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+          done < <(find buildenv.sh scripts platform target unica -type f -name '*.sh' -print0)
+          echo "Bash syntax validation passed."
+
+      - name: Validate Python syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          import py_compile
+          files = sorted(pathlib.Path(".").glob("target/a52sxq/**/*.py"))
+          for path in files:
+              py_compile.compile(str(path), doraise=True, cfile="/tmp/" + path.name + ".pyc")
+          print(f"Validated {len(files)} A52s Python files.")
+          PY
+
+      - name: Check A52s donor and platform invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'TARGET_PLATFORM="sm7325"' target/a52sxq/config.sh
+          grep -Fq 'TARGET_OS_SINGLE_SYSTEM_IMAGE="qssi"' platform/sm7325/config.sh
+          grep -Fq 'SOURCE_FIRMWARE="SM-S948B/EUX/' unica/configs/qssi.sh
+          grep -Fq 'SOURCE_PLATFORM_SDK_VERSION=36' unica/configs/qssi.sh
+          grep -Fq 'TARGET_CODENAME' scripts/internal/gen_config_file.sh
+          echo "A52s donor/platform invariants passed."

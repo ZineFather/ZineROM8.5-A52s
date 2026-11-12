@@ -7,7 +7,7 @@ on:
       - seventeen-s26u
   push:
     branches:
-      - work/seventeen-s26u-fixes
+      - seventeen-s26u
 
 permissions:
   contents: read

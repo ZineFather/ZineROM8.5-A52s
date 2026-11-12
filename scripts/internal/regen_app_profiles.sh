@@ -50,7 +50,8 @@ REGEN_PROFILE()
     local TARGET_FILE="$WORK_DIR/$REL"
     local SOURCE_PROFILE="$SOURCE_DIR/$REL.prof"
     local PROFILE="$WORK_DIR/$REL.prof"
-    local EXTRA="$EXTRA_DIR/$(basename "$REL").txt"
+    local EXTRA
+    EXTRA="$EXTRA_DIR/$(basename "$REL").txt"
     [ -f "$EXTRA" ] || EXTRA="$EXTRA_DIR/$(basename "$REL").txt.gz"
     local LOCATION NAME SOURCE_METHODS TARGET_METHODS HAD_PROFILE
     LOCATION="$(DEX_LOCATION "$REL")"
@@ -104,10 +105,12 @@ REGENERATED=0
 
 # 1. Source profiles whose APK/jar was modified by the build (apktool.sh deleted the stale .prof)
 while IFS= read -r SOURCE_PROFILE; do
-    REL="${SOURCE_PROFILE#$SOURCE_DIR/}"
+    REL="${SOURCE_PROFILE#"$SOURCE_DIR"/}"
     REL="${REL%.prof}"
     [[ "$REL" == *.apk || "$REL" == *.jar ]] || continue
-    [ -f "$SOURCE_DIR/$REL" ] && [ -f "$WORK_DIR/$REL" ] || continue
+    if [ ! -f "$SOURCE_DIR/$REL" ] || [ ! -f "$WORK_DIR/$REL" ]; then
+        continue
+    fi
     cmp -s "$SOURCE_DIR/$REL" "$WORK_DIR/$REL" && continue
     REGEN_PROFILE "$REL"
 done < <(find "$SOURCE_DIR/system" "$SOURCE_DIR/product" "$SOURCE_DIR/odm" -name "*.prof" ! -name "boot-image.prof" 2> /dev/null | sort)
@@ -123,7 +126,7 @@ if [ -d "$EXTRA_DIR" ]; then
             LOGW "No $NAME in the work dir for $(basename "$EXTRA"), skipping"
             continue
         fi
-        REL="${TARGET_FILE#$WORK_DIR/}"
+        REL="${TARGET_FILE#"$WORK_DIR"/}"
         # already merged in step 1 if the source profile was regenerated for a modified file
         [ -f "$SOURCE_DIR/$REL.prof" ] && [ -f "$SOURCE_DIR/$REL" ] && ! cmp -s "$SOURCE_DIR/$REL" "$TARGET_FILE" && continue
         REGEN_PROFILE "$REL"

@@ -32,7 +32,7 @@ jobs:
     name: Generate matrix
     needs: shellcheck
     # k4_un1ca: the fork's a52sxq build needs locally fetched firmware and prebuilts; only shellcheck runs on GitHub
-    if: github.repository != 'kusti420/k4_un1ca'
+    if: github.repository != 'ZineFather/ZineROM8.5-A52s'
     runs-on: ubuntu-24.04
 
     outputs:
@@ -53,7 +53,7 @@ jobs:
   build:
     name: Build
     needs: [shellcheck, generate-matrix]
-    if: github.repository != 'kusti420/k4_un1ca'
+    if: github.repository != 'ZineFather/ZineROM8.5-A52s'
     runs-on: ubuntu-24.04
 
     strategy:

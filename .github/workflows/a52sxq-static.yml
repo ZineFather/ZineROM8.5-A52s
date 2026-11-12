@@ -60,6 +60,7 @@ jobs:
           set -euo pipefail
           grep -Fq 'TARGET_PLATFORM="sm7325"' target/a52sxq/config.sh
           grep -Fq 'TARGET_OS_SINGLE_SYSTEM_IMAGE="qssi"' platform/sm7325/config.sh
+          grep -Fq 'TARGET_WLAN_SUPPORT_80211AX_6GHZ=false' platform/sm7325/config.sh
           grep -Fq 'SOURCE_FIRMWARE="SM-S948B/EUX/' unica/configs/qssi.sh
           grep -Fq 'SOURCE_PLATFORM_SDK_VERSION=36' unica/configs/qssi.sh
           grep -Fq 'TARGET_CODENAME' scripts/internal/gen_config_file.sh

@@ -41,6 +41,16 @@ jobs:
           done < <(find buildenv.sh scripts platform/sm7325 target/a52sxq unica -type f -name '*.sh' -print0)
           echo "Bash syntax validation passed."
 
+      - name: Run ShellCheck on A52s build scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            shellcheck -e SC1090,SC1091 -s bash "$file"
+          done < <(find platform scripts target unica -type f -name '*.sh' \
+            -not -name '*ssi.sh' -not -name 'config.sh' -not -name 'sff.sh' | sort)
+          echo "ShellCheck validation passed."
+
       - name: Validate Python syntax
         shell: bash
         run: |

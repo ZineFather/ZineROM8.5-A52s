@@ -1,6 +1,6 @@
 SKIPUNZIP=1
 
-# GPU driver selector (Settings > K4_UN1CA > UI > GPU driver). The stock A52s Adreno V@0530 stays in /vendor untouched
+# GPU driver selector (Settings > ZineUI > UI > GPU driver). The stock A52s Adreno V@0530 stays in /vendor untouched
 # and is the default. The built-in sets are every v<id>/ directory of this patch (v849 = V@0849, v863 = V@0863.1,
 # v530_55 = V@0530.55: the id is the version with "." as "_"), pinned by v<id>/SHA256SUMS, installed as complete sets
 # under /vendor/k4gpu/v<id>/; /system/etc/init/k4_gpu_driver.rc puts the selected one in place at early-boot:

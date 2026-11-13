@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Salvo Giangreco
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# ZineROM One UI 8.5 donor: Galaxy S26 Ultra SM-S948B / EUX.
+# ZineUI 8.5 donor: Galaxy S26 Ultra SM-S948B / EUX.
 # S948BXXS4AZHL / S948BOXM4AZHL / CP36080667 / S948BXXS4AZHL is an Android 16 build (Aug. 2026); Samsung's update
 # record confirms its Android version. Pin the complete AP/CSC/CP/BL tuple so a later Android 17 FUS release cannot replace it.
 # Source-specific feature values below retain the S26 Ultra hardware profile from the preceding port; they must be

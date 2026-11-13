@@ -219,7 +219,7 @@ fi
 
 if $BUILD_TARGET_FILES || $BUILD_FLASHABLE_ZIP; then
     if [[ "$TARGET_CODENAME" == "a52sxq" ]]; then
-        ZIP_FILE_NAME="ZineROM_A52s_OneUI"
+        ZIP_FILE_NAME="ZineUI_A52s_OneUI"
     else
         ZIP_FILE_NAME="${TARGET_CODENAME}_"
     fi

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="keywords_unica_settings">ZineROM, One UI, ROM, Custom ROM</string>
+    <string name="keywords_unica_settings">ZineUI, One UI, ROM, Custom ROM</string>
     <string name="keywords_unica_screen_resolution">Screen resolution, Resolution, FHD, HD, 1080p, 720p, 540p</string>
     <string name="menu_key_unica_top_settings">top_level_unica</string>
     <string name="unica_allow_downgrade_title">Allow application downgrade</string>
@@ -51,6 +51,7 @@
     <string name="unica_pif_toast_updated">Update completed successfully.</string>
     <string name="unica_pif_update_title">Update Play Integrity Fix</string>
     <string name="unica_rom_version_title">ROM version</string>
+    <string name="zineui_logo_title">ZineUI 8.5</string>
     <string name="unica_screen_resolution_confirm_msg">The previous resolution will be restored in %1$d s.</string>
     <string name="unica_screen_resolution_confirm_title">Keep this resolution?</string>
     <string name="unica_screen_resolution_custom">Custom</string>
@@ -63,11 +64,11 @@
     <string name="unica_screen_resolution_title">Screen resolution</string>
     <string name="unica_screen_resolution_zoom_unavailable">Screen zoom is not available at 540p. Switch the screen resolution to HD+ or Native to change it.</string>
     <string name="unica_secure_ss_title">Allow screenshots in protected apps</string>
-    <string name="unica_settings_title">ZineROM Settings</string>
+    <string name="unica_settings_title">ZineUI Settings</string>
     <string name="unica_ss_detection_title">Disable screen capture detection</string>
     <string name="unica_spoof_settings_title">Spoof settings</string>
     <string name="unica_ui_settings_title">UI settings</string>
-    <string name="unica_updates_title">ZineROM Updates</string>
+    <string name="unica_updates_title">ZineUI Updates</string>
     <string name="unica_vulkan_summary">Experimental. Some apps may show glitches or crash.</string>
     <string name="unica_vulkan_title">Vulkan renderer</string>
     <string name="k4_gpu_driver_active_title">GPU driver in use</string>

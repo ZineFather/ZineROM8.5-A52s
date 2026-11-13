@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Salvo Giangreco
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# UN1CA configuration file for Exynos devices (essi)
+# ZineUI base configuration for Exynos devices (essi)
 
 # Galaxy S26 (Exynos) (One UI 9.0 beta)
 #

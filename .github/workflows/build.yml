@@ -1,0 +1,136 @@
+name: Build ZineUI 8.5 (Galaxy A52s)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zineui-a52sxq-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-a52sxq:
+    name: Build a52sxq (Android 16)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Reclaim runner disk space
+        run: |
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /opt/hostedtoolcache/CodeQL \
+            /usr/local/share/boost \
+            /usr/local/share/chromium \
+            /usr/share/swift
+          sudo apt-get clean
+          sudo docker image prune --all --force || true
+          sudo docker builder prune --all --force || true
+          df -h /
+
+      - name: Check free disk before build
+        run: |
+          available_kib="$(df -Pk / | awk 'NR == 2 { print $4 }')"
+          minimum_kib="$((28 * 1024 * 1024))"
+          printf 'Available: %s KiB; required minimum: %s KiB\n' "$available_kib" "$minimum_kib"
+          if (( available_kib < minimum_kib )); then
+            echo '::error::Less than 28 GiB is available after cleanup; use a runner with more disk space.'
+            exit 1
+          fi
+
+      - name: Install host packages
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            attr ccache clang ffmpeg erofs-utils f2fs-tools \
+            libbrotli-dev libbz2-dev libgtest-dev libprotobuf-dev \
+            libunwind-dev libpcre2-dev libzstd-dev lld protobuf-compiler webp
+          sudo modprobe erofs 2>/dev/null || true
+          sudo modprobe f2fs 2>/dev/null || true
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install optional platform signing pair
+        env:
+          PLATFORM_KEY_PK8_B64: ${{ secrets.PLATFORM_KEY_PK8 }}
+          PLATFORM_KEY_PEM_B64: ${{ secrets.PLATFORM_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$PLATFORM_KEY_PK8_B64" && -n "$PLATFORM_KEY_PEM_B64" ]]; then
+            install -d -m 700 security
+            printf '%s' "$PLATFORM_KEY_PK8_B64" | base64 --decode > security/unica_platform.pk8
+            printf '%s' "$PLATFORM_KEY_PEM_B64" | base64 --decode > security/unica_platform.x509.pem
+            chmod 600 security/unica_platform.pk8 security/unica_platform.x509.pem
+            echo 'Optional platform signing key pair installed.'
+          else
+            echo 'No complete optional key pair supplied; the project signing fallback will be used.'
+          fi
+
+      - name: Build host dependencies
+        run: |
+          set -euo pipefail
+          source ./buildenv.sh a52sxq
+          ./scripts/build_dependencies.sh
+
+      - name: Download and extract pinned firmware
+        run: |
+          set -euo pipefail
+          source ./buildenv.sh a52sxq
+          attempt=1
+          until ./scripts/download_fw.sh; do
+            if (( attempt >= 3 )); then
+              echo '::error::Firmware download failed after three attempts.'
+              exit 1
+            fi
+            echo "Download attempt ${attempt} failed; retrying in 15 seconds."
+            attempt=$((attempt + 1))
+            sleep 15
+          done
+          ./scripts/extract_fw.sh
+          df -h /
+
+      - name: Build flashable ROM
+        run: |
+          set -euo pipefail
+          source ./buildenv.sh a52sxq
+          ./scripts/make_rom.sh
+          find out -maxdepth 1 -type f -name 'ZineUI_*_a52sxq*.zip' -print
+          test -n "$(find out -maxdepth 1 -type f -name 'ZineUI_*_a52sxq*.zip' -print -quit)"
+
+      - name: Check repository visibility
+        id: visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          private="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.private')"
+          echo "private=$private" >> "$GITHUB_OUTPUT"
+          echo "Repository private: $private"
+
+      - name: Upload flashable ROM (private repository only)
+        if: success() && steps.visibility.outputs.private == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZineUI-8.5-a52sxq-${{ github.run_number }}
+          path: out/ZineUI_*_a52sxq*.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Suppress artifact upload for public repository
+        if: success() && steps.visibility.outputs.private != 'true'
+        run: echo 'ROM artifact was not uploaded because this repository is public; proprietary firmware-derived builds stay private.'

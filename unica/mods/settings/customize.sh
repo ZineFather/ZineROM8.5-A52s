@@ -123,7 +123,7 @@ SMALI_PATCH "system" "system/framework/services.jar" \
     'invoke-virtual {v2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;' \
     'invoke-virtual {v2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;\n\n    iget-object v12, v2, Lcom/android/server/pm/InstallPackageHelper;->mContext:Landroid/content/Context;\n\n    invoke-virtual {v12}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\n\n    move-result-object v12\n\n    const-string v13, "unica_allow_downgrade"\n\n    const/4 v14, 0x0\n\n    invoke-static {v12, v13, v14}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I\n\n    move-result v12\n\n    if-eqz v12, :unica_allow_downgrade\n\n    const v12, 0x100080\n\n    or-int/2addr v3, v12\n\n    :unica_allow_downgrade'
 # Allow installing apps below MIN_INSTALLABLE_TARGET_SDK unless "unica_allow_sdkbypass" is set to 0 (on by default,
-# so users can install old apps out of the box; the UN1CA Settings switch reads the same default).
+# so users can install old apps out of the box; the ZineUI Settings switch reads the same default).
 # Registers/labels differ per source build: anchor on the MIN_INSTALLABLE_TARGET_SDK check,
 # append three registers past .locals and resolve the low register holding "this".
 INSTALL_HELPER_SMALI="$(cd "$APKTOOL_DIR/system/framework/services.jar" && \
@@ -223,7 +223,7 @@ SMALI_PATCH "system" "system/framework/services.jar" \
     'const-string/jumbo v10, "true"\n\n    invoke-static {v6, v10}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;'
 unset ASKS_SMALI ASKS_POLICY_METHOD ASKS_REFRESH_METHOD
 
-LOG_STEP_IN "- Adding UN1CA Settings"
+LOG_STEP_IN "- Adding ZineUI Settings"
 
 # Dynamically patch SecSettings
 # - Add missing/non-xml files in place
@@ -257,7 +257,7 @@ done < <(find "$MODPATH/SecSettings.apk" -type f)
 # a minified app: if a source firmware renames one, Settings would crash when the page opens. Check every reference now.
 python3 - "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" "$MODPATH/SecSettings.apk" \
     $(find "$MODPATH/SecSettings.apk" -path "*io/mesalabs/unica/settings/ui/GpuDriver*.smali") << 'PYEOF' \
-    || ABORT "SecSettings: a UN1CA controller references a method this SecSettings build does not have"
+    || ABORT "SecSettings: a ZineUI controller references a method this SecSettings build does not have"
 import glob, os, re, sys
 apk, mod, files = sys.argv[1], sys.argv[2], sys.argv[3:]
 idx = {}
@@ -329,7 +329,7 @@ if ! grep -q -r "ScreenResolutionUtils;->blockScreenZoomClick" \
         > /dev/null
 fi
 
-# Add UN1CA Settings SearchIndexableData registrations
+# Add ZineUI Settings SearchIndexableData registrations
 LOG "- Patching \"smali_classes2/com/android/settings/search/SearchFeatureProviderImpl\$\$ExternalSyntheticLambda0.smali\" in /system/system/priv-app/SecSettings.apk"
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     "smali_classes2/com/android/settings/search/SearchFeatureProviderImpl\$\$ExternalSyntheticLambda0.smali" "replace" \

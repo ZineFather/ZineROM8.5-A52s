@@ -1,10 +1,10 @@
 # Copyright (c) 2025 Salvo Giangreco
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# UN1CA configuration file for Snapdragon devices (qssi), China-base variant
+# ZineUI base configuration for Snapdragon devices (qssi), China-base variant
 
 # Galaxy Z Fold8 Ultra (Snapdragon, China SM-F9760, no GMS) (One UI 9.0)
-# k4_un1ca: de-Googled variant base. SOURCE_* values copied from qssi.sh; re-check against the CHC floating features.
+# ZineUI de-Googled variant base. SOURCE_* values copied from qssi.sh; re-check against the CHC floating features.
 SOURCE_FIRMWARE="SM-F9760/CHC/R5CX0000000"
 SOURCE_EXTRA_FIRMWARES=()
 SOURCE_PLATFORM_SDK_VERSION=37

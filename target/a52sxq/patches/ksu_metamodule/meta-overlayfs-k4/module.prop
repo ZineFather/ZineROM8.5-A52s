@@ -4,4 +4,4 @@ name=OverlayFS MetaModule
 version=1.3.1-k4.1
 versionCode=13101
 author=KernelSU Developers (K4 changes: kusti420)
-description=An implementation of a metamodule using OverlayFS for KernelSU. K4_UN1CA build of v1.3.1 (GPL-3.0, changes in K4_CHANGES.txt): Adreno GPU driver modules are left to the ROM's GPU driver selector; image label fixes.
+description=An implementation of a metamodule using OverlayFS for KernelSU. ZineUI integration of v1.3.1 (GPL-3.0, changes in K4_CHANGES.txt): Adreno GPU driver modules are left to the ROM's GPU driver selector; image label fixes.

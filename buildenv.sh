@@ -33,7 +33,8 @@ _GET_SRC_DIR()
 
 _PRINT_USAGE()
 {
-    echo "Usage: source buildenv.sh [--debug] <target>" >&2
+    echo "Usage: source buildenv.sh [--debug] [target]" >&2
+    echo "Default target: a52sxq (when available)" >&2
     echo "Available devices:" >&2
     printf '%s\n' "${TARGETS[@]}" >&2
 }
@@ -88,6 +89,8 @@ run_cmd()
     fi
 }
 
+alias zineui=run_cmd
+# Keep the original command alias for compatibility with existing scripts.
 alias unica=run_cmd
 # ]
 
@@ -128,7 +131,12 @@ while [[ "$1" == "-"* ]]; do
     shift
 done
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -eq 1 ]; then
+    SELECTED_TARGET="$1"
+elif [ "$#" -eq 0 ] && [ -d "$SRC_DIR/target/a52sxq" ]; then
+    SELECTED_TARGET="a52sxq"
+    echo "No target specified; defaulting to a52sxq."
+elif [ "$#" -eq 0 ]; then
     echo "No target specified. Please choose from the available devices below:"
 
     select SELECTED_TARGET in "${TARGETS[@]}"; do
@@ -139,7 +147,9 @@ if [ "$#" -ne 1 ]; then
         fi
     done
 else
-    SELECTED_TARGET="$1"
+    echo "Only one target may be specified." >&2
+    _PRINT_USAGE
+    return 1
 fi
 
 if [ ! -d "$SRC_DIR/target/$SELECTED_TARGET" ]; then

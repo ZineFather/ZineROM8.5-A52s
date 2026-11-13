@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Only the below variable(s) need to be changed!
-VERSION_MAJOR=4
-VERSION_MINOR=0
+VERSION_MAJOR=8
+VERSION_MINOR=5
 VERSION_PATCH=0
 
 # The below variables will be generated automatically
 #
 # Version name
 ROM_VERSION="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
-# k4: a target with its own version file (target/<codename>/version, e.g. a52sxq 9.3.10) uses that instead of the
-# upstream UN1CA version, so the zip name, ro.unica.version and the installer banner show the fork's version.
+# A target with its own version file (target/<codename>/version) uses that instead of this base default, so the zip
+# name, legacy ro.unica.version compatibility property, and installer banner show the target's ZineUI release.
 # gen_config_file sources this script with the target codename as $1.
 K4_TARGET_VERSION="$(tr -d '[:space:]' < "$SRC_DIR/target/${TARGET_CODENAME:-$1}/version" 2> /dev/null)"
 [ "$K4_TARGET_VERSION" ] && ROM_VERSION="$K4_TARGET_VERSION"

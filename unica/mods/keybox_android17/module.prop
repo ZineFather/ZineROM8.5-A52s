@@ -1,5 +1,5 @@
 id=keybox_android17
 name=Android 17 KeyMint attestation compatibility
-author=UN1CA, ZineROM maintainers
+author=UN1CA, @ZineFather (ZineROM Engine)
 description=Maps Android 17 SDK 37 to its KeyMint OS-version attestation value; not applied to Android 16.
 min_source_sdk=37
